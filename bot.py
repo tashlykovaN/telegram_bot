@@ -220,28 +220,28 @@ def echo(update, context):
 
 
 def photo_handler(update, context):
-    update.message.reply_text('first!')
+    # update.message.reply_text('first!')
 
     content_img = bot.getFile(update.message.photo[-1].file_id)
-    update.message.reply_text('second!')
+    # update.message.reply_text('second!')
     content_img.download('user_content_img.jpg')
     bot.send_photo(update.message.from_user.id, photo=content_img['file_id'])
 
     update.message.reply_text('Теперь загрузи картинку, стиль которой мне нужно взять!')
 
     style_img = bot.getFile(update.message.photo[-1].file_id)
-    update.message.reply_text('third!')
+    # update.message.reply_text('third!')
     style_img.download('user_style_img.jpg')
     bot.send_photo(update.message.from_user.id, photo=style_img['file_id'])
 
-    update.message.reply_text('forth')
+    # update.message.reply_text('forth')
     styleTransfer = StyleTransfer(content_img=content_img['file_id'], style_img=style_img['file_id'])
-    update.message.reply_text('5')
+    # update.message.reply_text('5')
     new_image = styleTransfer.operate()
-    update.message.reply_text('6')
+    # update.message.reply_text('6')
 
     bot.send_photo(update.message.from_user.id, photo=new_image)
-    update.message.reply_text('7')
+    # update.message.reply_text('7')
     # update.message.reply_photo(file)
     # #bot.send_photo(chat_id=update.message.chat.id, photo=file)
     # update.message.reply_text('Bad!')
@@ -265,35 +265,23 @@ def error(update, context):
 
 
 def main():
-    """Start the bot."""
-    # Create the Updater and pass it your bot's token.
-    # Make sure to set use_context=True to use the new context based callbacks
-    # Post version 12 this will no longer be necessary
     updater = Updater(TOKEN, use_context=True)
 
-    # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-    # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
 
-    # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
     dp.add_handler(MessageHandler(Filters.photo, photo_handler))
 
-    # log all errors
     dp.add_error_handler(error)
 
-    # Start the Bot
     updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
                           url_path=TOKEN)
     updater.bot.setWebhook('https://immense-ocean-60357.herokuapp.com/' + TOKEN)
 
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
 
