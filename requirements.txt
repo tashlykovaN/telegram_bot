@@ -1,0 +1,2 @@
+python-telegram-bot==12.7
+http://download.pytorch.org/whl/cpu/torch-1.2.0+cpu-c..
