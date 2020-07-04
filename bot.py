@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 
 bot = telegram.Bot(token=TOKEN)
 
+FLAG_NUM_PHOTO = 1
+content_img_name = '0'
+style_img_name = '0'
 
 class ContentLoss(Module):
 
@@ -209,62 +212,41 @@ def echo(update, context):
     update.message.reply_text(update.message.text)
 
 
-# def echo_photo(update, context):
-#     photo_file = update.message.photo[-1].get_file()
-#     photo_file.download('user_photo.jpg')
-#     # category = 'Photo Provided'
-#     # user_data[category] = 'Yes'
-#     # logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-#     update.message.reply_text('Great!')
-#     update.message.reply_photo(photo_file)
-
-
 def photo_handler(update, context):
-    # update.message.reply_text('first!')
 
-    content_img = bot.getFile(update.message.photo[-1].file_id)
-    # update.message.reply_text('second!')
-    content_img.download('user_content_img.jpg')
-    bot.send_photo(update.message.from_user.id, photo=content_img['file_id'])
+    global FLAG_NUM_PHOTO
+    if FLAG_NUM_PHOTO == 1:
+        content_img = bot.getFile(update.message.photo[-1].file_id)
+        content_img.download('user_content_img.jpg')
+        global content_img_name
+        content_img_name = str(content_img['file_id'])
+        update.message.reply_text('Теперь загрузи картинку, стиль которой мне нужно взять!')
+    else:
+        style_img = bot.getFile(update.message.photo[-1].file_id)
+        style_img.download('user_style_img.jpg')
+        global style_img_name
+        style_img_name = str(style_img['file_id'])
+        update.message.reply_text('Извини, я только учусь переделывать картинки. На данный момент у меня не получается. Возвращаю тебе твои фотографии)')
+        bot.send_photo(update.message.from_user.id, photo=style_img_name)
+        bot.send_photo(update.message.from_user.id, photo=content_img_name)
 
-    update.message.reply_text('Теперь загрузи картинку, стиль которой мне нужно взять!')
-
-    style_img = bot.getFile(update.message.photo[-1].file_id)
-    # update.message.reply_text('third!')
-    style_img.download('user_style_img.jpg')
-    bot.send_photo(update.message.from_user.id, photo=style_img['file_id'])
-
-    # update.message.reply_text('forth')
-    styleTransfer = StyleTransfer(content_img=content_img['file_id'], style_img=style_img['file_id'])
-    # update.message.reply_text('5')
+    FLAG_NUM_PHOTO *= -1
+    global style_img_name
+    global content_img_name
+    styleTransfer = StyleTransfer(content_img=content_img_name, style_img=style_img_name)
     new_image = styleTransfer.operate()
-    # update.message.reply_text('6')
 
     bot.send_photo(update.message.from_user.id, photo=new_image)
-    # update.message.reply_text('7')
-    # update.message.reply_photo(file)
-    # #bot.send_photo(chat_id=update.message.chat.id, photo=file)
-    # update.message.reply_text('Bad!')
-
-
-# def photo(update, context):
-#     user = update.message.from_user
-#     user_data = context.user_data
-#     photo_file = update.message.photo[-1].get_file()
-#     photo_file.download('user_photo.jpg')
-#     bot.send_photo(update.message.from_user.id, photo=photo_file)
-#     category = 'Photo Provided'
-#     user_data[category] = 'Yes'
-#     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-#     update.message.reply_text('Great! Is the food halal? Vegetarian? Please type in the dietary specifications of the food.')
+    update.message.reply_photo(file)
+    bot.send_photo(chat_id=update.message.chat.id, photo=file)
 
 
 def error(update, context):
-    """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
 def main():
+
     updater = Updater(TOKEN, use_context=True)
 
     dp = updater.dispatcher
